@@ -54,3 +54,23 @@
       authorized_key: 
         user: jacopo
         key: https://github.com/jnardiello.keys
+
+    ############################ SSH management ###############################
+    - name: Disabling Password based SSH authentication
+      replace:
+        path: /etc/ssh/sshd_config
+        regexp: 'PasswordAuthentication yes'
+        replace: 'PasswordAuthentication no'
+
+    - name: Disabling root login using SSH
+      replace:
+        path: /etc/ssh/sshd_config
+        regexp: 'PermitRootLogin prohibit-password'
+        replace: 'PermitRootLogin no'
+      notify:
+        Restart sshd
+
+    ############################ Handlers ###############################
+  handlers:
+    - name: Restart sshd
+      service: name=sshd state=restarted
