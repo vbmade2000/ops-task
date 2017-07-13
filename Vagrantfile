@@ -1,4 +1,4 @@
-# Vagrantfile to create Ubuntu xenial64 
+# Vagrantfile to create Ubuntu xenial64 with Ansible provisioning
 
 Vagrant.configure(2) do |config|
 
@@ -14,6 +14,14 @@ Vagrant.configure(2) do |config|
     	vbox.gui = false
     	vbox.memory = 2048
 
+    end
+
+    # Configuration to execute Ansible Playbook. Here I have used 
+    # ansible_local as it doesn't require ansible to be installed 
+    # on host machine. 
+    config.vm.provision "ansible_local" do |ansible|
+      ansible.playbook = "main.yml"
+      ansible.verbose = true 
     end
 
 end

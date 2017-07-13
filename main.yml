@@ -1,0 +1,56 @@
+---
+- hosts: all
+  connection: local
+  become: yes
+
+  tasks:
+
+    ############################ User and group management ###############################
+    - name: "Install whois package for mkpasswd utility to generate password"
+      apt: pkg=whois
+
+    - name: Generate encrypted password for user jacopo
+      shell: mkpasswd -s "jacopo" -S "AB" -R 10
+      register: jacopo_user_password
+
+    - name: Generate encrypted password for user malhar
+      shell: mkpasswd -s "malhar" -S "AB" -R 10
+      register: malhar_user_password
+
+    - group:
+        name: jacopo
+        state: present
+
+    - group:
+        name: malhar
+        state: present
+
+    - name: "Creating user jacopo"
+      user:
+        name: jacopo
+        comment: "Jacopo Nardiello"
+        uid: 1040
+        group: "jacopo"
+        groups: "admin,sudo,ubuntu"
+        shell: /bin/bash
+        password: "{{jacopo_user_password.stdout}}"
+
+    - name: "Creating user malhar"
+      user:
+        name: malhar
+        comment: "Malhar Vora"
+        uid: 1041
+        group: "malhar"
+        groups: "admin,sudo,ubuntu"
+        shell: /bin/bash
+        password: "{{malhar_user_password.stdout}}"
+
+    - name: Upload authorized key for user malhar
+      authorized_key: 
+        user: malhar
+        key: "{{ lookup('file', '~/shared/pub_keys/id_rsa.pub') }}"
+
+    - name: Upload authorized key for user jacopo
+      authorized_key: 
+        user: jacopo
+        key: https://github.com/jnardiello.keys
