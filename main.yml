@@ -3,6 +3,10 @@
   connection: local
   become: yes
 
+  vars:
+    domain: sighup.dev
+    site_dir_owner: ubuntu
+
   tasks:
 
     ############################ User and group management ###############################
@@ -70,7 +74,38 @@
       notify:
         Restart sshd
 
-    ############################ Handlers ###############################
+    ############################ Apache management ###############################
+    - name: "Installing Apache Web Server"
+      apt: pkg=apache2
+
+    - name: Copy website files to domain directory
+      synchronize:
+        src: /home/ubuntu/shared/web_files/site/
+        dest: /var/www/{{domain}}
+        recursive: yes
+
+    - name: Change owner, group and permissions of domain directory
+      file:
+        dest: /var/www/{{domain}}
+        mode: 0775
+        recurse: yes
+        owner: "{{site_dir_owner}}"
+        group: "{{site_dir_owner}}"
+
+    - name: Creating apache virtual host {{domain}}
+      copy:
+        src: /home/ubuntu/shared/web_files/apache_virtual_host        
+        dest: /etc/apache2/sites-available/{{domain}}.conf
+    
+    - name: Enable virtual host {{domain}}  
+      command: a2ensite {{domain}}  
+      notify:
+        Restart apache2
+
+  ############################ Handlers ###############################
   handlers:
     - name: Restart sshd
       service: name=sshd state=restarted
+
+    - name: Restart apache2
+      service: name=apache2 state=restarted

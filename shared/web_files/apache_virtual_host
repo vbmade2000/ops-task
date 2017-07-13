@@ -1,0 +1,8 @@
+<VirtualHost *:80>
+        ServerAdmin admin@sighup.com
+        ServerName www.sighup.dev
+        ServerAlias sighup.dev
+        DocumentRoot /var/www/sighup.dev/
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
